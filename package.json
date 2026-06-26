@@ -1,0 +1,38 @@
+{
+  "name": "whatsapp-bible",
+  "version": "1.0.0",
+  "description": "A free WhatsApp Bible chatbot built with Node.js, Express, whatsapp-web.js, and SQLite.",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "nodemon src/server.js",
+    "check": "node --check src/server.js && node --check src/bot.js && node --check src/config/database.js && node --check src/services/bibleService.js && node --check src/services/userService.js && node --check src/services/reminderService.js && node --check src/services/statsService.js && node --check src/handlers/messageHandler.js && node --check src/handlers/groupHandler.js && node --check src/commands/helpCommand.js && node --check src/commands/profileCommand.js && node --check src/commands/reminderCommand.js && node --check src/commands/planCommand.js && node --check src/commands/adminCommand.js && node --check src/utils/scriptureParser.js && node --check src/utils/dateUtils.js"
+  },
+  "keywords": [
+    "whatsapp",
+    "bible",
+    "chatbot",
+    "sqlite",
+    "whatsapp-web.js"
+  ],
+  "license": "MIT",
+  "engines": {
+    "node": "20.x || 22.x || 23.x || 24.x || 25.x || 26.x"
+  },
+  "dependencies": {
+    "axios": "^1.7.9",
+    "better-sqlite3": "^12.11.1",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "node-cron": "^4.5.0",
+    "qrcode": "^1.5.4",
+    "qrcode-terminal": "^0.12.0",
+    "whatsapp-web.js": "^1.26.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.9"
+  },
+  "overrides": {
+    "uuid": "^11.1.1"
+  }
+}
