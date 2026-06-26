@@ -10,11 +10,6 @@ let reconnecting = false;
 
 function createClient() {
   const phoneNumber = (process.env.WHATSAPP_PAIR_WITH_PHONE || process.env.WHATSAPP_PHONE_NUMBER || '').replace(/\D/g, '');
-  const pairWithPhoneNumber = {
-    phoneNumber,
-    showNotification: process.env.WHATSAPP_PAIR_SHOW_NOTIFICATION !== 'false',
-    intervalMs: Number(process.env.WHATSAPP_PAIR_INTERVAL_MS || 180000)
-  };
 
   const puppeteerOptions = {
     headless: true,
@@ -31,8 +26,16 @@ function createClient() {
     ]
   };
 
-  if (phoneNumber) {
+  // Phone pairing doesn't work reliably in headless environments like Railway
+  // Disable it and use QR code instead
+  if (phoneNumber && process.env.ENABLE_PHONE_PAIRING === 'true') {
     console.log(`Phone-number pairing enabled for: ${phoneNumber}`);
+    const pairWithPhoneNumber = {
+      phoneNumber,
+      showNotification: process.env.WHATSAPP_PAIR_SHOW_NOTIFICATION !== 'false',
+      intervalMs: Number(process.env.WHATSAPP_PAIR_INTERVAL_MS || 180000)
+    };
+
     return new Client({
       authStrategy: new LocalAuth({
         clientId: process.env.WHATSAPP_SESSION_NAME || 'whatsapp-bible'
@@ -42,6 +45,7 @@ function createClient() {
     });
   }
 
+  console.log('Using QR code authentication (phone pairing disabled for headless environment)');
   return new Client({
     authStrategy: new LocalAuth({
       clientId: process.env.WHATSAPP_SESSION_NAME || 'whatsapp-bible'
