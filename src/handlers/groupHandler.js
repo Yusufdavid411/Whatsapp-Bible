@@ -39,10 +39,19 @@ async function isBotMentioned(client, message) {
   const mentionedIds = message.mentionedIds || [];
   const body = String(message.body || '');
 
-  return (
-    Boolean(botId && mentionedIds.includes(botId)) ||
-    Boolean(botPhone && body.includes(`@${botPhone}`))
-  );
+  const mentionedById = botId && mentionedIds.includes(botId);
+  const mentionedByPhone = botPhone && body.includes(`@${botPhone}`);
+
+  console.log('Group mention check:', {
+    botId,
+    botPhone,
+    mentionedIds,
+    body,
+    mentionedById,
+    mentionedByPhone
+  });
+
+  return mentionedById || mentionedByPhone;
 }
 
 async function handleGroupMessage(client, message) {

@@ -13,6 +13,7 @@ function formatProfile(user) {
     `Joined: ${formatDate(user.joinedAt)}`,
     `Reminder: ${user.reminderEnabled ? `On at ${user.reminderTime}` : 'Off'}`,
     `Reading plan: ${user.readingPlan || 'None'}`,
+    `Translation: ${(user.translation || 'kjv').toUpperCase()}`,
     `Total messages: ${user.totalMessages || 0}`
   ].join('\n');
 }

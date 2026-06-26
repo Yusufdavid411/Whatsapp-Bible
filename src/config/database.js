@@ -24,7 +24,8 @@ db.exec(`
     reminderEnabled INTEGER NOT NULL DEFAULT 0,
     reminderTime TEXT NOT NULL,
     readingPlan TEXT,
-    lastReminderSent TEXT
+    lastReminderSent TEXT,
+    translation TEXT NOT NULL DEFAULT 'kjv'
   );
 
   CREATE TABLE IF NOT EXISTS groups (

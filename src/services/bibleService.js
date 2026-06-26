@@ -24,7 +24,7 @@ function getTranslation() {
   return process.env.BIBLE_TRANSLATION || 'kjv';
 }
 
-function formatVerseResponse(payload, requestedReference) {
+function formatVerseResponse(payload, requestedReference, translation = null) {
   const verses = payload.verses || [];
 
   if (!verses.length && payload.text) {
@@ -41,11 +41,11 @@ function formatVerseResponse(payload, requestedReference) {
     '',
     text || String(payload.text || '').trim(),
     '',
-    `_${getTranslation().toUpperCase()}_`
+    `_${(translation || getTranslation()).toUpperCase()}_`
   ].join('\n').trim();
 }
 
-async function lookupVerse(referenceText) {
+async function lookupVerse(referenceText, userTranslation = null) {
   const parsed = parseScriptureReference(referenceText);
 
   if (!parsed) {
@@ -59,7 +59,7 @@ async function lookupVerse(referenceText) {
     const url = `${getApiBaseUrl()}/${encodeURIComponent(parsed.reference)}`;
     const response = await axios.get(url, {
       params: {
-        translation: getTranslation()
+        translation: userTranslation || getTranslation()
       },
       timeout: 12000
     });
@@ -67,7 +67,7 @@ async function lookupVerse(referenceText) {
     return {
       ok: true,
       reference: parsed.reference,
-      message: formatVerseResponse(response.data, parsed.reference)
+      message: formatVerseResponse(response.data, parsed.reference, userTranslation || getTranslation())
     };
   } catch (error) {
     const apiMessage = error.response?.data?.error || error.message;
@@ -80,12 +80,12 @@ async function lookupVerse(referenceText) {
   }
 }
 
-async function getVerseOfTheDay() {
+async function getVerseOfTheDay(userTranslation = null) {
   const reference = VERSE_OF_THE_DAY_REFERENCES[
     Math.floor(Math.random() * VERSE_OF_THE_DAY_REFERENCES.length)
   ];
 
-  return lookupVerse(reference);
+  return lookupVerse(reference, userTranslation);
 }
 
 module.exports = {

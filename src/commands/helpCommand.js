@@ -6,6 +6,7 @@ function getHelpMessage() {
     '/profile - Show your profile',
     '/verse John 3:16 - Look up a Bible verse',
     '/verseoftheday - Get a random verse for today',
+    '/translation kjv - Set Bible translation (kjv, niv, esv, etc.)',
     '/reminder on - Enable daily reminders',
     '/reminder off - Disable daily reminders',
     '/setreminder 06:00 - Set reminder time',

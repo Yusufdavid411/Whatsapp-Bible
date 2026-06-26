@@ -6,6 +6,7 @@ const {
 } = require('../commands/reminderCommand');
 const { handlePlanCommand } = require('../commands/planCommand');
 const { handleAdminCommand } = require('../commands/adminCommand');
+const { handleTranslationCommand } = require('../commands/translationCommand');
 const bibleService = require('../services/bibleService');
 const statsService = require('../services/statsService');
 const userService = require('../services/userService');
@@ -40,12 +41,14 @@ async function handleCommand({ client, message, phone, body }) {
 
     case '/verse': {
       const reference = args.join(' ');
-      const result = await bibleService.lookupVerse(reference);
+      const user = await userService.getUser(phone);
+      const result = await bibleService.lookupVerse(reference, user?.translation);
       return sendReply(message, result.message);
     }
 
     case '/verseoftheday': {
-      const result = await bibleService.getVerseOfTheDay();
+      const user = await userService.getUser(phone);
+      const result = await bibleService.getVerseOfTheDay(user?.translation);
       return sendReply(message, result.message);
     }
 
@@ -74,6 +77,11 @@ async function handleCommand({ client, message, phone, body }) {
       return sendReply(message, response);
     }
 
+    case '/translation': {
+      const response = await handleTranslationCommand(phone, args);
+      return sendReply(message, response);
+    }
+
     default:
       return sendReply(message, `Unknown command.\n\n${getHelpMessage()}`);
   }
@@ -90,7 +98,8 @@ async function handleTextMessage({ client, message, body }) {
   const reference = parseScriptureReference(body);
 
   if (reference) {
-    const result = await bibleService.lookupVerse(reference.reference);
+    const user = await userService.getUser(phone);
+    const result = await bibleService.lookupVerse(reference.reference, user?.translation);
     return sendReply(message, result.message);
   }
 

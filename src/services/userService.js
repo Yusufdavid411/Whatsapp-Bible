@@ -30,7 +30,8 @@ async function registerOrUpdateUser(phone, name = 'Unknown') {
       totalMessages: 1,
       reminderEnabled: false,
       reminderTime: process.env.DEFAULT_REMINDER_TIME || '06:00',
-      readingPlan: null
+      readingPlan: null,
+      translation: process.env.BIBLE_TRANSLATION || 'kjv'
     };
 
     db.prepare(`
@@ -42,9 +43,10 @@ async function registerOrUpdateUser(phone, name = 'Unknown') {
         totalMessages,
         reminderEnabled,
         reminderTime,
-        readingPlan
+        readingPlan,
+        translation
       )
-      VALUES (@phone, @name, @joinedAt, @lastSeen, @totalMessages, @reminderEnabled, @reminderTime, @readingPlan)
+      VALUES (@phone, @name, @joinedAt, @lastSeen, @totalMessages, @reminderEnabled, @reminderTime, @readingPlan, @translation)
     `).run({
       ...user,
       reminderEnabled: user.reminderEnabled ? 1 : 0
@@ -130,6 +132,15 @@ async function updateReadingPlan(phone, readingPlan) {
   return getUser(phone);
 }
 
+async function updateTranslation(phone, translation) {
+  db.prepare('UPDATE users SET translation = ? WHERE phone = ?').run(
+    translation,
+    normalizePhone(phone)
+  );
+
+  return getUser(phone);
+}
+
 module.exports = {
   normalizePhone,
   registerOrUpdateUser,
@@ -138,5 +149,6 @@ module.exports = {
   updateReminder,
   setReminderSent,
   getUsersWithReminderTime,
-  updateReadingPlan
+  updateReadingPlan,
+  updateTranslation
 };
