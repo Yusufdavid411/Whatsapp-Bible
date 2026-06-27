@@ -26,7 +26,9 @@ function createClient() {
     ]
   };
 
-  if (phoneNumber) {
+  // Only enable phone pairing if explicitly enabled with ENABLE_PHONE_PAIRING=true
+  // Phone pairing doesn't work reliably in headless environments like Railway
+  if (phoneNumber && process.env.ENABLE_PHONE_PAIRING === 'true') {
     console.log(`Phone-number pairing enabled for: ${phoneNumber}`);
     const pairWithPhoneNumber = {
       phoneNumber,
@@ -41,6 +43,10 @@ function createClient() {
       puppeteer: puppeteerOptions,
       pairWithPhoneNumber
     });
+  }
+
+  if (phoneNumber) {
+    console.log(`Phone number provided but phone pairing disabled. Set ENABLE_PHONE_PAIRING=true to enable.`);
   }
 
   console.log('Using QR code authentication');
@@ -150,27 +156,7 @@ async function initBot() {
     await client.initialize();
   } catch (error) {
     console.error('Failed to initialize WhatsApp client:', error.message);
-
-    // If phone pairing failed, try again without it
-    if (error.message.includes('pairing') || error.message.includes('evaluate')) {
-      console.log('Phone pairing failed in headless environment, retrying with QR code...');
-
-      try {
-        await client.destroy();
-      } catch (destroyError) {
-        console.error('Error destroying client:', destroyError.message);
-      }
-
-      // Remove phone pairing from environment and retry
-      delete process.env.WHATSAPP_PAIR_WITH_PHONE;
-      delete process.env.WHATSAPP_PHONE_NUMBER;
-
-      client = createClient();
-      attachEvents(client);
-      await client.initialize();
-    } else {
-      console.log('Bot initialization failed. Please check configuration and restart.');
-    }
+    console.log('Bot initialization failed. Please check configuration and restart.');
   }
 
   return client;
