@@ -10,11 +10,6 @@ let reconnecting = false;
 
 function createClient() {
   const phoneNumber = (process.env.WHATSAPP_PAIR_WITH_PHONE || process.env.WHATSAPP_PHONE_NUMBER || '').replace(/\D/g, '');
-  const pairWithPhoneNumber = {
-    phoneNumber,
-    showNotification: process.env.WHATSAPP_PAIR_SHOW_NOTIFICATION !== 'false',
-    intervalMs: Number(process.env.WHATSAPP_PAIR_INTERVAL_MS || 180000)
-  };
 
   const puppeteerOptions = {
     headless: true,
@@ -33,6 +28,12 @@ function createClient() {
 
   if (phoneNumber) {
     console.log(`Phone-number pairing enabled for: ${phoneNumber}`);
+    const pairWithPhoneNumber = {
+      phoneNumber,
+      showNotification: process.env.WHATSAPP_PAIR_SHOW_NOTIFICATION !== 'false',
+      intervalMs: Number(process.env.WHATSAPP_PAIR_INTERVAL_MS || 180000)
+    };
+
     return new Client({
       authStrategy: new LocalAuth({
         clientId: process.env.WHATSAPP_SESSION_NAME || 'whatsapp-bible'
@@ -42,6 +43,7 @@ function createClient() {
     });
   }
 
+  console.log('Using QR code authentication');
   return new Client({
     authStrategy: new LocalAuth({
       clientId: process.env.WHATSAPP_SESSION_NAME || 'whatsapp-bible'
@@ -135,7 +137,7 @@ function reconnectClient() {
   }, 5000);
 }
 
-function initBot() {
+async function initBot() {
   if (client) {
     return client;
   }
@@ -143,11 +145,32 @@ function initBot() {
   client = createClient();
   attachEvents(client);
 
-  client.initialize().catch((error) => {
+  try {
+    await client.initialize();
+  } catch (error) {
     console.error('Failed to initialize WhatsApp client:', error.message);
-    // Don't reconnect on initialization errors to prevent crash loops
-    console.log('Bot initialization failed. Please check configuration and restart.');
-  });
+
+    // If phone pairing failed, try again without it
+    if (error.message.includes('pairing') || error.message.includes('evaluate')) {
+      console.log('Phone pairing failed in headless environment, retrying with QR code...');
+
+      try {
+        await client.destroy();
+      } catch (destroyError) {
+        console.error('Error destroying client:', destroyError.message);
+      }
+
+      // Remove phone pairing from environment and retry
+      delete process.env.WHATSAPP_PAIR_WITH_PHONE;
+      delete process.env.WHATSAPP_PHONE_NUMBER;
+
+      client = createClient();
+      attachEvents(client);
+      await client.initialize();
+    } else {
+      console.log('Bot initialization failed. Please check configuration and restart.');
+    }
+  }
 
   return client;
 }
