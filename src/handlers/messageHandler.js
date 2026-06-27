@@ -111,20 +111,31 @@ async function handleTextMessage({ client, message, body }) {
 
 async function handleIncomingMessage(client, message) {
   try {
+    console.log('Received message:', {
+      from: message.from,
+      fromMe: message.fromMe,
+      body: message.body,
+      author: message.author
+    });
+
     if (!message || message.fromMe || message.from === 'status@broadcast') {
+      console.log('Message ignored (fromMe or broadcast)');
       return;
     }
 
     const body = String(message.body || '').trim();
 
     if (!body) {
+      console.log('Message ignored (empty body)');
       return;
     }
 
     if (message.from.endsWith('@g.us')) {
+      console.log('Handling group message');
       return handleGroupMessage(client, message);
     }
 
+    console.log('Handling text message');
     return handleTextMessage({ client, message, body });
   } catch (error) {
     console.error('Message handling failed:', error);

@@ -105,6 +105,7 @@ function attachEvents(activeClient) {
   });
 
   activeClient.on('message', (message) => {
+    console.log('Message event received');
     handleIncomingMessage(activeClient, message).catch((error) => {
       console.error('Unhandled message error:', error);
     });
