@@ -6,5 +6,15 @@
   "deploy": {
     "startCommand": "npm start",
     "healthcheckPath": "/health"
-  }
+  },
+  "volumes": [
+    {
+      "name": "whatsapp-session",
+      "mountPath": "/app/.wwebjs_auth"
+    },
+    {
+      "name": "database",
+      "mountPath": "/app/data"
+    }
+  ]
 }
